@@ -96,7 +96,7 @@ The three tiers are:
 
 -   Expose the application safely via an **Application Load Balancer**.
 
->![architecture Diagram](screenshots/architecture.JPG)
+![Architecture Overview](screenshots/architecture-overview.jpg)
 
 **Section 2: Architecture Design -- VPC, Subnets, Routing, and Core
 Networking**
@@ -121,7 +121,8 @@ Command (AWS CLI example):
 
 aws ec2 create-vpc \--cidr-block 10.0.0.0/16 \--region me-central-1
 
->![VPC](screenshots/vpc.JPG)
+![VPC Setup](screenshots/vpc-setup.png)
+
 
 **2.2 Subnet Design**
 
@@ -136,7 +137,7 @@ Availability Zones (AZs)** for high availability.
 
     -   Hosts: Load Balancer + NAT Gateway + Bastion/Test EC2
 
->![Public Subnet Diagram](screenshots/public_subnet.JPG)
+![Public Subnets](screenshots/public-subnets.png)
 
 
 -   **Private Subnets (App Layer)**
@@ -147,7 +148,8 @@ Availability Zones (AZs)** for high availability.
 
     -   Hosts: Application EC2 (Spring PetClinic)
 
->![Private Subnet Diagram](screenshots/private_subnet.JPG)
+![Private Subnets](screenshots/private-subnets.png)
+
    **Private Subnets (DB Layer)**
 
     -   Subnet E: 10.0.5.0/24 (AZ1)
@@ -159,7 +161,9 @@ Availability Zones (AZs)** for high availability.
 This way, even if **one AZ fails**, traffic automatically shifts to the
 other.
 
-![Subnets Diagram](screenshots/subnets.JPG)
+![RDS Subnet Group](screenshots/rds-subnet-group.png)
+
+![All Subnets Overview](screenshots/all-subnets-overview.png)
 
 
 **2.3 Internet Gateway (IGW)**
@@ -177,11 +181,7 @@ aws ec2 create-internet-gateway
 aws ec2 attach-internet-gateway \--vpc-id vpc-xxxx
 \--internet-gateway-id igw-xxxx
 
-![](media/image7.png){width="6.268055555555556in" height="0.34375in"}
-
-![A screenshot of a computer AI-generated content may be
-incorrect.](media/image8.png){width="6.268055555555556in"
-height="1.4361111111111111in"}
+![Internet Gateway Attached](screenshots/internet-gateway-attached.png)
 
 **2.4 NAT Gateway**
 
@@ -200,7 +200,7 @@ Routing rule:
 -   Private subnets route outbound traffic to NAT Gateway → NAT forwards
     to Internet Gateway → internet.
 
-![IGW](screenshots/igw_attach_to_vpc.JPG)
+![NAT Gateway Setup](screenshots/nat-gateway-setup.png)
 
 **2.5 Route Tables**
 
@@ -212,7 +212,7 @@ We set up **different route tables** for public and private subnets:
 
     -   Associated with Public Subnets A & B.
 
-![public route table](screenshots/rt.JPG)
+![Public Route Table](screenshots/public-route-table.png)
 
 -   **Private App Route Table**:
 
@@ -220,7 +220,7 @@ We set up **different route tables** for public and private subnets:
 
     -   Associated with Subnets C & D (Application Tier).
 
-![private route table](screenshots/private_rt.JPG)
+![Private Route Table](screenshots/private-route-table.png)
 
 -   **Private DB Route Table**:
 
@@ -243,7 +243,9 @@ Security groups act like **firewalls** at the instance level.
 
     -   Outbound: Allow all traffic to App EC2 SG.
 
-![web ec2 sg](screenshots/web_tier_sg.JPG)
+![Web Tier Security Group](screenshots/web-tier-security-group.png)
+
+![Web SG Inbound Rules](screenshots/web-sg-inbound-rules.png)
 
 
 -   **Load Balancer SG**
@@ -252,7 +254,10 @@ Security groups act like **firewalls** at the instance level.
 
     -   Outbound: Allow all traffic to App EC2 SG.
 
->![ALB ec2 sg](screenshots/load_balancer_sg.JPG)
+![ALB Security Group Rules](screenshots/alb-security-group-rules.png)
+
+![ALB Security Group Config](screenshots/alb-security-group-config.png)
+
 
 -   **App EC2 SG**
 
@@ -260,7 +265,8 @@ Security groups act like **firewalls** at the instance level.
 
     -   Outbound: Allow MySQL (3306) to DB SG.
 
->![app ec2 sg](screenshots/rules_of_app_sg.JPG)
+![Application Security Group](screenshots/application-security-group.png)
+![App SG Inbound Rules](screenshots/app-sg-inbound-rules.png)
 
 -   **Database SG**
 
@@ -268,7 +274,9 @@ Security groups act like **firewalls** at the instance level.
 
     -   Outbound: Restricted to internal VPC traffic.
 
->![Database sg](screenshots/data_tier_sg.JPG)
+![Database Security Group](screenshots/database-security-group.png)
+
+![Database SG Inbound Rules](screenshots/database-sg-inbound-rules.png)
 
 
 **2.7 Network Flow Recap**
@@ -289,7 +297,7 @@ This ensures:
 
 -   **Least privilege principle** is enforced at every level.
 
->![Network flow](screenshots/vpc_map.JPG)
+![Network Topology](screenshots/network-topology.png)
 
 
 **Section 3: Provisioning EC2 Instances and Installing Dependencies**
@@ -333,7 +341,7 @@ from public subnet** or **SSM Session Manager**.
 
 8.  Launch the instance.
 
->![Network flow](screenshots/vpc_map.JPG)
+![Web Server EC2](screenshots/web-server-ec2.png)
 
 **3.1 Launching the Private EC2 Instances**
 
@@ -367,7 +375,8 @@ from public subnet** or **SSM Session Manager**.
 
 16. Launch the instance.
 
->![ec2 ](screenshots/web_server_instance.JPG)
+![App Server EC2](screenshots/app-server-ec2.png)
+
 
 **3.2 Connecting to Private EC2**
 
@@ -386,7 +395,7 @@ Since the instance is private, we used one of two methods:
 
     -   Directly open shell into private EC2.
 
->![ec2 ](screenshots/app_server_instance.JPG)
+![SSH Connection](screenshots/ssh-connection.png)
 
 **3.3 Updating the System**
 
@@ -425,7 +434,7 @@ Expected output:
 
 -   Apache Maven version (3.8.x)
 
->![maven and java installlation](screenshots/maven_java_installation.JPG)
+![Java Maven Installation](screenshots/java-maven-installation.png)
 
 
 
@@ -439,7 +448,9 @@ sudo git clone https://github.com/spring-projects/spring-petclinic.git
 
 cd spring-petclinic
 
->![cloning Spring PetClinic](screenshots/clone_spring-petclinic.JPG)
+
+![Cloning PetClinic Repo](screenshots/cloning-petclinic-repo.png)
+
 
 **3.7 Building the Application**
 
@@ -461,7 +472,9 @@ Expected output:
 
 spring-petclinic-3.5.0-SNAPSHOT.jar
 
->![Spring PetClinic](screenshots/petclinic.JPG)
+
+![PetClinic Build Success](screenshots/petclinic-build-success.png)
+
 
 **3.8 Running the Application**
 
@@ -495,6 +508,9 @@ At this point:
 -   Tomcat started on port(s): 8080 (http)
 
 -   Started PetClinicApplication in XX seconds
+
+[Application Running Browser](screenshots/application-running-browser.png)
+
 
 **3.9 Verifying Application Service**
 
@@ -532,12 +548,14 @@ The database tier is hosted in **Amazon RDS for MySQL**, which provides
 a managed, scalable relational database service. Unlike running MySQL on
 EC2, RDS handles backups, patching, and replication automatically.
 
->![create database](screenshots/create_db.JPG)
+
 
 **4.1 Creating a Security Group for RDS**
 
 Before launching the database, we need a **DB Security Group** to
 control traffic.
+
+![RDS Creation Wizard](screenshots/rds-creation-wizard.png)
 
 1.  Go to **EC2 → Security Groups → Create Security Group**.
 
@@ -577,7 +595,7 @@ control traffic.
 
 9.  Connectivity:
 
->![create database connectivity](screenshots/connectivity_db.JPG)
+![RDS Connectivity Settings](screenshots/rds-connectivity-settings.png)
 
 -   VPC: Three-Tier-VPC.
 
@@ -595,10 +613,9 @@ control traffic.
 
 > Wait \~10 minutes for the RDS instance to be available.
 
->![created database](screenshots/db.JPG)
+![RDS Instance Created](screenshots/rds-instance-created.png)
 
 > **4.3 Verifying Connectivity from Private EC2**
->
 > Once RDS was created, we tested the connection from our **private
 > EC2** where PetClinic is running.
 
@@ -622,7 +639,6 @@ control traffic.
 >
 > mysql\>
 
->![connecting from the app server](screenshots/Verifying Connectivity from Private EC2.JPG)
 
 > **4.4 Creating the Database Schema**
 >
@@ -734,10 +750,12 @@ control traffic.
 
     -   Click **Add to registered**.
 
->![Creating the Target Group](screenshots/Creating the Target Group.JPG)
+![Target Group Setup](screenshots/target-group-setup.png)
 
 > **5.3 Creating the Application Load Balancer**
->
+
+![ALB Network Mapping](screenshots/alb-network-mapping.png)
+
 > Now we expose the app to the public through the ALB.
 
 1.  Go to **EC2 → Load Balancers → Create Load Balancer**.
@@ -764,7 +782,6 @@ control traffic.
     -   Add HTTP:80 → Forward to petclinic-tg.
 
 > Click **Create Load Balancer**.
- >![Creating the Application Load Balancer](Creating the Application Load Balancer/db.JPG)
 
 > **5.4 Verifying the ALB Health Checks**
 >
@@ -780,6 +797,9 @@ control traffic.
         SG**.
 
     -   Confirm health check path / is valid.
+
+![Load Balancer Results](screenshots/load-balancer-results.png)
+
 
 > **5.5 Accessing the Application**
 >
@@ -954,6 +974,9 @@ control traffic.
 -   **Expected Output:** Connection to \<rds-endpoint\> 3306 port
     \[tcp/mysql\] succeeded!
 
+![MySQL Connection Success](screenshots/mysql-connection-success.png)
+
+
 2.  Optional: Verify database credentials and schema:
 
 > mysql -h \<rds-endpoint\> -u \<db-username\> -p
@@ -1003,3 +1026,5 @@ control traffic.
     from your IP.
 
 -   **RDS Security Group:** Allows MySQL from private EC2 only.
+
+![Target Group Healthy](screenshots/target-group-healthy.png)
