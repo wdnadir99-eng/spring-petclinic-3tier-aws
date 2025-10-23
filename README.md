@@ -572,9 +572,9 @@ control traffic.
 
 4.  Outbound: Allow all (default).
 
-> **4.2 Creating the RDS Instance**
->
-> Steps inside **AWS Console**:
+ **4.2 Creating the RDS Instance**
+
+ Steps inside **AWS Console**:
 
 1.  Navigate to **RDS → Databases → Create Database**.
 
@@ -618,9 +618,11 @@ control traffic.
 
 ![RDS Instance Created](screenshots/rds-instance-created.png)
 
-> **4.3 Verifying Connectivity from Private EC2**
-> Once RDS was created, we tested the connection from our **private
-> EC2** where PetClinic is running.
+
+ **4.3 Verifying Connectivity from Private EC2**
+
+ Once RDS was created, we tested the connection from our **private
+ EC2** where PetClinic is running.
 
 1.  Install MySQL client:
 
@@ -641,25 +643,26 @@ control traffic.
     -u admin -p
 ```
 
-> Enter the password. You should see the MySQL shell:
->
+ Enter the password. You should see the MySQL shell:
+
 > mysql\>
 
 
  **4.4 Creating the Database Schema**
 
 > Inside MySQL shell:
->
+```sql
 > CREATE DATABASE petclinic;
 >
 > SHOW DATABASES;
->
+```
 
 **4.5 Configuring Spring PetClinic to Use RDS**
 
-> The PetClinic app by default uses an **in-memory H2 database** (not
-> persistent). To connect it to MySQL, we edited the
-> **application.properties** file.
+ The PetClinic app by default uses an **in-memory H2 database** (not
+ persistent). To connect it to MySQL, we edited the
+
+ **application.properties** file.
 
 1.  Navigate to resources folder:
 ```bash
@@ -683,7 +686,7 @@ spring.jpa.show-sql=true
 
  **Section 5: Load Balancer Setup (Application Load Balancer - ALB)**
 
-> We used an **Application Load Balancer (ALB)** because:
+We used an **Application Load Balancer (ALB)** because:
 
 -   It supports **HTTP/HTTPS** (Layer 7).
 
@@ -782,7 +785,7 @@ Now we expose the app to the public through the ALB.
 
     -   Add HTTP:80 → Forward to petclinic-tg.
 
-> Click **Create Load Balancer**.
+ Click **Create Load Balancer**.
 
  **5.4 Verifying the ALB Health Checks**
 
@@ -868,6 +871,7 @@ Sometimes ALB may fail. Here's how we handled it:
 
 5.  Click **Create NAT Gateway**.
 
+
 **6.3 Update the Route Table for the Private Subnet**
 
  To send private subnet traffic through NAT Gateway:
@@ -901,7 +905,7 @@ Sometimes ALB may fail. Here's how we handled it:
 
 -   Private EC2 can download packages and pull code.
 
-> **6.5 Security Group Considerations**
+ **6.5 Security Group Considerations**
 
 -   **Private EC2 SG**:
 
@@ -943,6 +947,7 @@ sudo git clone https://github.com/spring-projects/spring-petclinic.git
 
 4.  Verify the private EC2 serves PetClinic on port 8080 (health check
     for ALB).
+
 
 **Section 9: Final Verification, Screenshots, and Documentation Tips**
 
@@ -1034,3 +1039,19 @@ ps aux \| grep spring-petclinic
 -   **RDS Security Group:** Allows MySQL from private EC2 only.
 
 ![Target Group Healthy](screenshots/target-group-healthy.png)
+
+
+Conclusion
+This project successfully designed and deployed a secure, scalable, and highly available three-tier web application on AWS using the Spring PetClinic sample. The architecture effectively separates concerns into distinct tiers—Presentation, Application, and Database—each isolated within its own subnet and protected by strict security groups.
+
+Key achievements include:
+
+Enhanced Security: By placing the application and database in private subnets, the architecture ensures that no backend resources are directly exposed to the public internet. Communication is strictly controlled via security groups following the principle of least privilege.
+
+Proven Scalability & Resilience: The use of an Application Load Balancer distributing traffic across instances in multiple Availability Zones (AZs) provides a foundation for easy horizontal scaling and high availability, ensuring the application can withstand zone failures.
+
+Managed Services: Leveraging Amazon RDS for the database simplified operations by automating backups, patching, and maintenance, allowing a focus on the application itself.
+
+Operational Functionality: The NAT Gateway provided essential outbound internet access for private instances, enabling software installation and updates without compromising security.
+
+This implementation serves as a robust blueprint for deploying production-grade web applications on AWS, demonstrating core cloud concepts such as VPC networking, security, and the effective use of managed services.
