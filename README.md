@@ -117,9 +117,6 @@ depend on the network design.
 This provides up to **65,536 private IPs**, enough to carve into
 multiple subnets across AZs.
 
-Command (AWS CLI example):
-
-aws ec2 create-vpc \--cidr-block 10.0.0.0/16 \--region me-central-1
 
 ![VPC Setup](screenshots/vpc-setup.png)
 
@@ -175,11 +172,12 @@ other.
     outside.
 
 Command:
-
+```bash
 aws ec2 create-internet-gateway
 
 aws ec2 attach-internet-gateway \--vpc-id vpc-xxxx
 \--internet-gateway-id igw-xxxx
+```
 
 ![Internet Gateway Attached](screenshots/internet-gateway-attached.png)
 
@@ -400,21 +398,21 @@ Since the instance is private, we used one of two methods:
 **3.3 Updating the System**
 
 Once inside the private EC2:
-
+```bash
 sudo apt update -y
 
 sudo apt upgrade -y
+```
 
 This ensures all system packages are up to date.
 
 **3.4 Installing Java (OpenJDK 17)**
 
 Spring PetClinic requires Java 17.
-
+```bash
 sudo apt install openjdk-17-jdk -y
-
 java -version
-
+```
 Expected output:
 
 **3.5 Installing Git and Maven**
@@ -422,11 +420,11 @@ Expected output:
 We needed both **Git** (to clone the PetClinic repo) and **Maven** (to
 build the project).
 
+```bash
 sudo apt install git maven -y
-
 git \--version
-
 mvn -v
+```
 
 Expected output:
 
@@ -442,12 +440,11 @@ Expected output:
 
 Navigate to /opt and clone the official repo:
 
+```bash
 cd /opt
-
 sudo git clone https://github.com/spring-projects/spring-petclinic.git
-
 cd spring-petclinic
-
+```
 
 ![Cloning PetClinic Repo](screenshots/cloning-petclinic-repo.png)
 
@@ -455,18 +452,18 @@ cd spring-petclinic
 **3.7 Building the Application**
 
 We then packaged the application into a .jar file:
-
+```bash
 sudo mvn package
-
+```
 -   Maven downloaded dependencies (this took a while).
 
 -   At the end, the .jar file was generated inside the target directory.
 
 Navigate to target folder:
-
+```bash
 cd target
-
 ls
+```
 
 Expected output:
 
@@ -480,7 +477,9 @@ spring-petclinic-3.5.0-SNAPSHOT.jar
 
 Run the application on port 8080:
 
+```bash
 sudo java -jar spring-petclinic-3.5.0-SNAPSHOT.jar
+```
 
 At this point:
 
@@ -497,7 +496,9 @@ Started PetClinicApplication in XX seconds
 
 Run the application on port 8080:
 
+```bash
 sudo java -jar spring-petclinic-3.5.0-SNAPSHOT.jar
+```
 
 At this point:
 
@@ -509,15 +510,15 @@ At this point:
 
 -   Started PetClinicApplication in XX seconds
 
-[Application Running Browser](screenshots/application-running-browser.png)
+![Application Running Browser](screenshots/application-running-browser.png)
 
 
 **3.9 Verifying Application Service**
 
 We verified that the application was listening:
-
+```bash
 sudo ss -tulnp \| grep 8080
-
+```
 Output:
 
 tcp LISTEN 0 100 \*:8080 \*:\* users:((\"java\",pid=1261,fd=9))
@@ -528,10 +529,10 @@ This confirmed PetClinic was running on **port 8080**.
 
 Instead of tying up the SSH session, we could run it as a background
 process:
-
+```bash
 nohup sudo java -jar spring-petclinic-3.5.0-SNAPSHOT.jar \>
 petclinic.log 2\>&1 &
-
+```
 -   nohup → makes process immune to logout.
 
 -   & → runs in background.
@@ -539,8 +540,10 @@ petclinic.log 2\>&1 &
 -   Logs stored in petclinic.log.
 
 Check running process:
-
+```bash
 ps aux \| grep spring-petclinic
+```
+
 
 **Section 4: Database Setup with Amazon RDS (MySQL)**
 
@@ -621,67 +624,65 @@ control traffic.
 
 1.  Install MySQL client:
 
-2.  sudo apt install mysql-client -y
-
+2. 
+```bash
+ sudo apt install mysql-client -y
+```
 3.  Test connection:
-
-4.  nc -vz three-tier-db.clmaggewmy20.me-central-1.rds.amazonaws.com
+```bash
+ nc -vz three-tier-db.clmaggewmy20.me-central-1.rds.amazonaws.com
     3306
+```
 
 > Expected output:
-
-5.  Log in to MySQL:
-
-6.  mysql -h three-tier-db.clmaggewmy20.me-central-1.rds.amazonaws.com
+4.  Log in to MySQL:
+```bash
+ mysql -h three-tier-db.clmaggewmy20.me-central-1.rds.amazonaws.com
     -u admin -p
+```
 
 > Enter the password. You should see the MySQL shell:
 >
 > mysql\>
 
 
-> **4.4 Creating the Database Schema**
->
+ **4.4 Creating the Database Schema**
+
 > Inside MySQL shell:
 >
 > CREATE DATABASE petclinic;
 >
 > SHOW DATABASES;
 >
-> **4.5 Configuring Spring PetClinic to Use RDS**
->
+
+**4.5 Configuring Spring PetClinic to Use RDS**
+
 > The PetClinic app by default uses an **in-memory H2 database** (not
 > persistent). To connect it to MySQL, we edited the
 > **application.properties** file.
 
 1.  Navigate to resources folder:
-
-2.  cd /opt/spring-petclinic/src/main/resources/
-
-3.  Edit the configuration:
-
-4.  sudo nano application.properties
-
-5.  Add the following lines:
-
-6.  spring.datasource.url=jdbc:mysql://three-tier-db.clmaggewmy20.me-central-1.rds.amazonaws.com:3306/petclinic
-
-7.  spring.datasource.username=admin
-
-8.  spring.datasource.password=yourpassword
-
-9.  spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-
-10.
-
-11. spring.jpa.hibernate.ddl-auto=update
-
-12. spring.jpa.show-sql=true
+```bash
+ cd /opt/spring-petclinic/src/main/resources/
+```
+2.  Edit the configuration:
+```bash
+sudo nano application.properties
+```
+3.  Add the following lines:
+```bash
+spring.datasource.url=jdbc:mysql://three-tier-db.clmaggewmy20.me-central-1.rds.amazonaws.com:3306/petclinic
+spring.datasource.username=admin
+spring.datasource.password=yourpassword
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+```
 
 13. Save and exit (CTRL+O, CTRL+X).
 
-> **Section 5: Load Balancer Setup (Application Load Balancer - ALB)**
->
+ **Section 5: Load Balancer Setup (Application Load Balancer - ALB)**
+
 > We used an **Application Load Balancer (ALB)** because:
 
 -   It supports **HTTP/HTTPS** (Layer 7).
@@ -690,10 +691,10 @@ control traffic.
 
 -   It scales automatically across multiple Availability Zones.
 
-> **5.1 Security Group for the ALB**
->
-> Before creating the ALB, we needed a Security Group that allowed
-> **public access**.
+ **5.1 Security Group for the ALB**
+
+Before creating the ALB, we needed a Security Group that allowed
+ **public access**.
 
 1.  Go to **EC2 → Security Groups → Create Security Group**.
 
@@ -707,10 +708,10 @@ control traffic.
 
 4.  Outbound: Allow all traffic (default).
 
-> **5.2 Creating the Target Group**
->
-> A **Target Group** is required to tell the ALB where to send traffic
-> (our app EC2).
+ **5.2 Creating the Target Group**
+
+ A **Target Group** is required to tell the ALB where to send traffic
+ (our app EC2).
 
 1.  Go to **EC2 → Target Groups → Create Target Group**.
 
@@ -752,11 +753,11 @@ control traffic.
 
 ![Target Group Setup](screenshots/target-group-setup.png)
 
-> **5.3 Creating the Application Load Balancer**
+**5.3 Creating the Application Load Balancer**
 
 ![ALB Network Mapping](screenshots/alb-network-mapping.png)
 
-> Now we expose the app to the public through the ALB.
+Now we expose the app to the public through the ALB.
 
 1.  Go to **EC2 → Load Balancers → Create Load Balancer**.
 
@@ -783,9 +784,9 @@ control traffic.
 
 > Click **Create Load Balancer**.
 
-> **5.4 Verifying the ALB Health Checks**
->
-> After a few minutes, check **Target Group → Targets tab**.
+ **5.4 Verifying the ALB Health Checks**
+
+ After a few minutes, check **Target Group → Targets tab**.
 
 -   Status should show **healthy**
 
@@ -801,9 +802,9 @@ control traffic.
 ![Load Balancer Results](screenshots/load-balancer-results.png)
 
 
-> **5.5 Accessing the Application**
->
-> Once targets are healthy:
+ **5.5 Accessing the Application**
+
+ Once targets are healthy:
 
 1.  Copy the ALB DNS name from the console, e.g.:
 
@@ -815,9 +816,9 @@ control traffic.
 
 5.  You should see the **Spring PetClinic home page**.
 
-> **5.6 Troubleshooting (If Needed)**
->
-> Sometimes ALB may fail. Here's how we handled it:
+**5.6 Troubleshooting (If Needed)**
+
+Sometimes ALB may fail. Here's how we handled it:
 
 1.  **502 Bad Gateway** → Usually means ALB can't reach the target.
 
@@ -828,11 +829,11 @@ control traffic.
     -   Fix: Confirm PetClinic responds on /. If app is on a different
         path (e.g. /petclinic), update health check path
 
-> **Section 6: NAT Gateway and Internet Access for Private EC2**
->
-> In a multi-tier architecture, the **private EC2** cannot access the
-> internet directly because it is in a **private subnet**. However, we
-> need it to:
+ **Section 6: NAT Gateway and Internet Access for Private EC2**
+
+ In a multi-tier architecture, the **private EC2** cannot access the
+ internet directly because it is in a **private subnet**. However, we
+ need it to:
 
 -   Install packages (apt-get update, Maven, Git).
 
@@ -840,13 +841,13 @@ control traffic.
 
 -   Download dependencies for Spring Boot.
 
-> The solution is a **NAT Gateway**, which allows outbound traffic from
-> private instances while keeping them unreachable from the internet.
->
-> **6.1 Create an Elastic IP (EIP)**
->
-> A NAT Gateway requires an Elastic IP to provide a public IP for
-> outbound connections.
+ The solution is a **NAT Gateway**, which allows outbound traffic from
+ private instances while keeping them unreachable from the internet.
+
+ **6.1 Create an Elastic IP (EIP)**
+
+ A NAT Gateway requires an Elastic IP to provide a public IP for
+ outbound connections.
 
 1.  Go to **VPC → Elastic IPs → Allocate Elastic IP address**.
 
@@ -854,7 +855,7 @@ control traffic.
 
 3.  Note down the EIP for NAT Gateway creation.
 
-> **6.2 Create a NAT Gateway**
+ **6.2 Create a NAT Gateway**
 
 1.  Go to **VPC → NAT Gateways → Create NAT Gateway**.
 
@@ -867,9 +868,9 @@ control traffic.
 
 5.  Click **Create NAT Gateway**.
 
-> **6.3 Update the Route Table for the Private Subnet**
->
-> To send private subnet traffic through NAT Gateway:
+**6.3 Update the Route Table for the Private Subnet**
+
+ To send private subnet traffic through NAT Gateway:
 
 1.  Go to **VPC → Route Tables → Private Subnet Route Table**.
 
@@ -881,20 +882,20 @@ control traffic.
 
 3.  Save changes.
 
-> Now all outbound internet traffic from the private subnet goes through
-> the NAT Gateway.
->
-> **6.4 Verify Private EC2 Internet Access**
->
-> SSH into the private EC2 and run:
->
-> ping -c 4 google.com
->
-> or
->
-> sudo apt-get update
->
-> If it succeeds:
+ Now all outbound internet traffic from the private subnet goes through
+ the NAT Gateway.
+
+ **6.4 Verify Private EC2 Internet Access**
+
+ SSH into the private EC2 and run:
+
+ ping -c 4 google.com
+
+ or
+
+ ``` sudo apt-get update```
+
+ If it succeeds:
 
 -   NAT Gateway is configured correctly.
 
@@ -910,67 +911,72 @@ control traffic.
 
 -   **NAT Gateway**: No SG required (managed by AWS).
 
-> **6.6 Testing Application Dependencies**
->
-> After NAT Gateway setup, you can:
+ **6.6 Testing Application Dependencies**
+
+ After NAT Gateway setup, you can:
 
 1.  Install Maven and JDK (if not installed):
 
-> sudo apt-get update
->
-> sudo apt-get install openjdk-17-jdk maven -y
+```bash
+ sudo apt-get update
+
+ sudo apt-get install openjdk-17-jdk maven -y
+```
 
 2.  Clone PetClinic repository:
-
-> sudo git clone https://github.com/spring-projects/spring-petclinic.git
-> /opt/spring-petclinic
-
+```bash
+sudo git clone https://github.com/spring-projects/spring-petclinic.git
+/opt/spring-petclinic
+```
 3.  Build the app:
 
-> cd /opt/spring-petclinic
->
-> sudo mvn package
->
-> cd target
->
-> sudo java -jar spring-petclinic-3.5.0-SNAPSHOT.jar
+```bash
+
+ cd /opt/spring-petclinic
+
+ sudo mvn package
+
+ cd target
+
+ sudo java -jar spring-petclinic-3.5.0-SNAPSHOT.jar
+```
 
 4.  Verify the private EC2 serves PetClinic on port 8080 (health check
     for ALB).
 
-> **Section 9: Final Verification, Screenshots, and Documentation Tips**
->
-> This section ensures that the **multi-tier PetClinic project** is
-> fully functional and ready for deployment verification. It also
-> provides a framework for capturing screenshots and adding them to the
-> documentation for non-IT readers.
->
-> **9.1 Verify PetClinic Application on Private EC2**
+**Section 9: Final Verification, Screenshots, and Documentation Tips**
+
+ This section ensures that the **multi-tier PetClinic project** is
+ fully functional and ready for deployment verification. It also
+ provides a framework for capturing screenshots and adding them to the
+ documentation for non-IT readers.
+
+ **9.1 Verify PetClinic Application on Private EC2**
 
 1.  SSH into **private EC2**:
-
-> ssh -i your-key.pem ubuntu@\<private-ec2-ip\>
-
+```bash
+ ssh -i your-key.pem ubuntu@\<private-ec2-ip\>
+```
 2.  Check if the PetClinic app is running:
-
-> ps aux \| grep spring-petclinic
-
--   **Expected Output:** A Java process with
+```bash
+ps aux \| grep spring-petclinic
+```
+-  **Expected Output:** A Java process with
     spring-petclinic-3.5.0-SNAPSHOT.jar should appear.
 
 3.  Verify the app is listening on port 8080:
-
+```bash
 > sudo ss -tulpn \| grep 8080
-
+```
 -   **Expected Output:** java process should show LISTEN on \*:8080.
 
->
-> **9.2 Verify RDS Connectivity**
+
+ **9.2 Verify RDS Connectivity**
 
 1.  From private EC2, test MySQL connection to RDS:
-
-> nc -vz \<rds-endpoint\> 3306
-
+```bash
+ nc -vz \<rds-endpoint\> 3306
+```
 -   **Expected Output:** Connection to \<rds-endpoint\> 3306 port
     \[tcp/mysql\] succeeded!
 
@@ -978,7 +984,7 @@ control traffic.
 
 
 2.  Optional: Verify database credentials and schema:
-
+```sql
 > mysql -h \<rds-endpoint\> -u \<db-username\> -p
 >
 > SHOW DATABASES;
@@ -986,8 +992,8 @@ control traffic.
 > USE \<petclinic-db\>;
 >
 > SHOW TABLES;
->
-> **9.3 Verify Load Balancer Connectivity**
+```
+**9.3 Verify Load Balancer Connectivity**
 
 1.  Access **ALB DNS name** in a browser:
 
@@ -1003,7 +1009,7 @@ control traffic.
 
     -   /oups → triggers error page
 
-> **9.4 Verify Target Group Health Checks**
+ **9.4 Verify Target Group Health Checks**
 
 1.  Go to **EC2 → Target Groups → petclinic-tg → Targets**.
 
@@ -1018,7 +1024,7 @@ control traffic.
 
     -   Verify **health check path** is /.
 
-> **9.5 Security Verification**
+ **9.5 Security Verification**
 
 -   **ALB Security Group:** Allows HTTP/HTTPS from anywhere.
 
